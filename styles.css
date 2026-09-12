@@ -1,0 +1,47 @@
+body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    background: #f5f5f5;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+input {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.cliente {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+/* ========================================
+   EVITAR ZOOM AUTOMÁTICO EN IPHONE
+======================================== */
+
+input,
+select,
+textarea {
+    font-size: 16px;
+}

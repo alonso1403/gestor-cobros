@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+>
+
+    <title>Gestor de Cobros</title>
+
+    <link
+        rel="stylesheet"
+        href="styles.css"
+    >
+
+    <link
+        rel="manifest"
+        href="manifest.json"
+    >
+
+</head>
+
+<body>
+
+    <h1>Gestor de Cobros</h1>
+    <h1>Piwi Shop</h1>
+
+
+    <!-- Nuevo Cliente -->
+
+    <div class="card">
+
+        <h2>Nuevo Cliente</h2>
+
+        <input
+            type="text"
+            id="nombreCliente"
+            placeholder="Nombre del cliente"
+        >
+
+        <input
+            type="number"
+            id="montoCuenta"
+            placeholder="Monto total"
+            min="0"
+        >
+
+<button onclick="guardarCliente()">
+    
+    Guardar Cliente
+</button>
+
+<!-- <button
+    onclick="exportarClientesJSON()"
+    style="margin-top: 10px;"
+>
+    Exportar clientes
+</button>-->
+
+<!--<button 
+    onclick="exportarClientesJSON()"
+    style="margin-top: 10px;"
+    >
+    
+    Crear respaldo
+</button>
+
+<button
+    onclick="importarClientesJSON()"
+    style="margin-top: 10px;"
+>
+    Importar respaldo
+</button>-->
+
+<!--<button onclick="borrarLocalStorage()"
+style="margin-top: 10px;"
+>
+    Borrar datos de prueba
+</button>
+-->
+    </div>
+
+    <!-- Buscar Cliente -->
+
+    <div class="card">
+
+        <h2>Buscar Cliente</h2>
+
+        <input
+            type="text"
+            id="buscarCliente"
+            placeholder="Buscar por nombre..."
+            oninput="buscarCliente()"
+        >
+
+    </div>
+
+    <!-- Clientes -->
+
+    <div id="clientes">
+    </div>
+
+<!-- Respaldo -->
+<div class="card">
+    <h2>Respaldo</h2>
+
+    <button onclick="exportarClientesJSON()"
+    style="margin-top: 10px;"
+    >
+        Crear respaldo
+    </button>
+
+    <button onclick="importarClientesJSON()"
+    style="margin-top: 10px;"
+    >
+        Importar respaldo
+    </button>
+</div>
+
+    <script src="app.js"></script>
+
+</body>
+
+</html>
