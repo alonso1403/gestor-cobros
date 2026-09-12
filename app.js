@@ -1,4 +1,237 @@
 // ========================================
+// SUPABASE
+// ========================================
+
+const SUPABASE_URL = "https://cayofsfrffwwvdqxwsdf.supabase.co";
+const SUPABASE_KEY = "sb_publishable_iewpGszY8yRCQqruVUpKEA_R5Bz3gKI";
+
+const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+console.log("Supabase conectado correctamente");
+
+// ========================================
+// AUTENTICACIÓN
+// ========================================
+
+async function iniciarSesion() {
+
+    const email =
+        document.getElementById("email").value.trim();
+
+    const password =
+        document.getElementById("password").value;
+
+    const mensaje =
+        document.getElementById("mensajeLogin");
+
+    if (!email || !password) {
+
+        mensaje.textContent =
+            "Ingrese el correo y la contraseña.";
+
+        return;
+    }
+
+    const { data, error } =
+        await supabaseClient.auth.signInWithPassword({
+
+            email: email,
+            password: password
+
+        });
+
+    if (error) {
+
+        console.error(error);
+
+        mensaje.textContent =
+            "Correo o contraseña incorrectos.";
+
+        return;
+    }
+
+    console.log(
+        "Usuario autenticado:",
+        data.user
+    );
+
+    mostrarAplicacion();
+
+}
+
+
+// ========================================
+// REGISTRAR USUARIO
+// ========================================
+
+async function registrarse() {
+
+    const email =
+        document.getElementById("email").value.trim();
+
+    const password =
+        document.getElementById("password").value;
+
+    const mensaje =
+        document.getElementById("mensajeLogin");
+
+    if (!email || !password) {
+
+        mensaje.textContent =
+            "Ingrese el correo y la contraseña.";
+
+        return;
+    }
+
+    const { data, error } =
+        await supabaseClient.auth.signUp({
+
+            email: email,
+            password: password
+
+        });
+
+    if (error) {
+
+        console.error(error);
+
+        mensaje.textContent =
+            error.message;
+
+        return;
+    }
+
+    mensaje.textContent =
+        "Cuenta creada correctamente.";
+
+}
+
+
+// ========================================
+// CERRAR SESIÓN
+// ========================================
+
+async function cerrarSesion() {
+
+    const { error } =
+        await supabaseClient.auth.signOut();
+
+    if (error) {
+
+        console.error(error);
+
+        return;
+    }
+
+    mostrarLogin();
+
+}
+
+
+// ========================================
+// MOSTRAR APLICACIÓN
+// ========================================
+
+function mostrarAplicacion() {
+
+    document.getElementById("login")
+        .style.display = "none";
+
+    document.getElementById("app")
+        .style.display = "block";
+
+}
+
+
+// ========================================
+// MOSTRAR LOGIN
+// ========================================
+
+function mostrarLogin() {
+
+    document.getElementById("login")
+        .style.display = "block";
+
+    document.getElementById("app")
+        .style.display = "none";
+
+}
+
+
+// ========================================
+// COMPROBAR SESIÓN
+// ========================================
+
+async function comprobarSesion() {
+
+    const { data, error } =
+        await supabaseClient.auth.getSession();
+
+    if (error) {
+
+        console.error(error);
+
+        mostrarLogin();
+
+        return;
+    }
+
+    if (data.session) {
+
+        console.log(
+            "Sesión encontrada"
+        );
+
+        mostrarAplicacion();
+
+    } else {
+
+        console.log(
+            "No hay sesión"
+        );
+
+        mostrarLogin();
+
+    }
+
+}
+
+
+// ========================================
+// VIGILAR CAMBIOS DE SESIÓN
+// ========================================
+
+supabaseClient.auth.onAuthStateChange(
+
+    (event, session) => {
+
+        console.log(
+            "Cambio de autenticación:",
+            event
+        );
+
+        if (session) {
+
+            mostrarAplicacion();
+
+        } else {
+
+            mostrarLogin();
+
+        }
+
+    }
+
+);
+
+
+// Comprobar sesión al cargar
+comprobarSesion();
+
+// ========================================
 // CARGAR CLIENTES
 // ========================================
 
@@ -791,6 +1024,153 @@ function exportarClientesJSON() {
     enlace.click();
 
     URL.revokeObjectURL(url);
+}
+
+
+// ========================================
+// EXPORTAR CLIENTES A EXCEL
+// ========================================
+
+function exportarClientesExcel() {
+
+    if (clientes.length === 0) {
+        alert("No hay clientes para exportar.");
+        return;
+    }
+
+    // ========================================
+    // HOJA CLIENTES
+    // ========================================
+
+    const datosClientes = clientes.map(cliente => ({
+        "Cliente": cliente.nombre,
+        "Total": cliente.total,
+        "Abonado": cliente.abonado,
+        "Saldo": cliente.total - cliente.abonado,
+        "Estado": cliente.estado
+    }));
+
+    const hojaClientes =
+        XLSX.utils.json_to_sheet(datosClientes);
+
+
+    // ========================================
+    // HOJA ABONOS
+    // ========================================
+
+    const datosAbonos = [];
+
+    clientes.forEach(cliente => {
+
+        if (!cliente.abonos) {
+            return;
+        }
+
+        cliente.abonos.forEach(abono => {
+
+            datosAbonos.push({
+                "Cliente": cliente.nombre,
+                "Fecha": abono.fecha,
+                "Monto": abono.monto
+            });
+
+        });
+
+    });
+
+    const hojaAbonos =
+        XLSX.utils.json_to_sheet(
+            datosAbonos.length > 0
+                ? datosAbonos
+                : [{
+                    "Cliente": "",
+                    "Fecha": "",
+                    "Monto": ""
+                }]
+        );
+
+
+    // ========================================
+    // HOJA HISTORIAL
+    // ========================================
+
+    const datosHistorial = [];
+
+    clientes.forEach(cliente => {
+
+        if (!cliente.historial) {
+            return;
+        }
+
+        cliente.historial.forEach((cuenta, index) => {
+
+            datosHistorial.push({
+                "Cliente": cliente.nombre,
+                "Cuenta anterior": index + 1,
+                "Total": cuenta.total,
+                "Abonado": cuenta.abonado,
+                "Saldo": cuenta.total - cuenta.abonado,
+                "Estado": cuenta.estado
+            });
+
+        });
+
+    });
+
+    const hojaHistorial =
+        XLSX.utils.json_to_sheet(
+            datosHistorial.length > 0
+                ? datosHistorial
+                : [{
+                    "Cliente": "",
+                    "Cuenta anterior": "",
+                    "Total": "",
+                    "Abonado": "",
+                    "Saldo": "",
+                    "Estado": ""
+                }]
+        );
+
+
+    // ========================================
+    // CREAR LIBRO DE EXCEL
+    // ========================================
+
+    const libro = XLSX.utils.book_new();
+
+
+    // ========================================
+    // AGREGAR HOJAS
+    // ========================================
+
+    XLSX.utils.book_append_sheet(
+        libro,
+        hojaClientes,
+        "Clientes"
+    );
+
+    XLSX.utils.book_append_sheet(
+        libro,
+        hojaAbonos,
+        "Abonos"
+    );
+
+    XLSX.utils.book_append_sheet(
+        libro,
+        hojaHistorial,
+        "Historial"
+    );
+
+
+    // ========================================
+    // CREAR ARCHIVO
+    // ========================================
+
+    XLSX.writeFile(
+        libro,
+        "clientes.xlsx"
+    );
+
 }
 
 

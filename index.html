@@ -26,10 +26,51 @@
 
 <body>
 
+    <!-- ======================================== -->
+    <!-- LOGIN -->
+    <!-- ======================================== -->
+
+    <div id="login" class="card">
+
+        <h2>Iniciar sesión</h2>
+
+        <input
+            type="email"
+            id="email"
+            placeholder="Correo electrónico"
+        >
+
+        <input
+            type="password"
+            id="password"
+            placeholder="Contraseña"
+        >
+
+        <button onclick="iniciarSesion()">
+            Iniciar sesión
+        </button>
+
+        <!--<button onclick="registrarse()">
+            Crear cuenta
+        </button>-->
+
+        <p id="mensajeLogin"></p>
+
+    </div>
+
+
+    <!-- ======================================== -->
+    <!-- APLICACIÓN -->
+    <!-- ======================================== -->
+
+    <div id="app" style="display: none;">
+
     <h1>Gestor de Cobros</h1>
     <h1>Piwi Shop</h1>
 
-
+<button class="btn-cerrar-sesion" onclick="cerrarSesion()">
+    Cerrar sesión
+</button>
     <!-- Nuevo Cliente -->
 
     <div class="card">
@@ -119,9 +160,14 @@ style="margin-top: 10px;"
     >
         Importar respaldo
     </button>
-</div>
 
-    <script src="app.js"></script>
+    <button onclick="exportarClientesExcel()" style="margin-top: 10px;">
+    Crear respaldo Excel
+</button>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="app.js"></script>
 
 </body>
 
