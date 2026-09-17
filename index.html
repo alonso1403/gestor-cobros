@@ -117,12 +117,60 @@
     Importar respaldo
 </button>-->
 
-<!--<button onclick="borrarLocalStorage()"
+<button onclick="borrarLocalStorage()"
 style="margin-top: 10px;"
 >
     Borrar datos de prueba
 </button>
--->
+
+    </div>
+
+    <!-- Asistente de cobros -->
+    <button
+        type="button"
+        id="botonAbrirAsistente"
+        class="boton-flotante-asistente"
+        onclick="alternarAsistente()"
+        aria-controls="panelAsistente"
+        aria-expanded="false"
+    >
+        Chat de cobros
+    </button>
+
+    <div id="panelAsistente" class="card asistente-card asistente-oculto">
+
+        <div class="encabezado-asistente">
+            <h2>Asistente de cobros</h2>
+            <button
+                type="button"
+                class="boton-cerrar-asistente"
+                onclick="alternarAsistente(false)"
+                aria-label="Cerrar asistente"
+            >
+                ×
+            </button>
+        </div>
+
+        <div id="mensajesAsistente" class="mensajes-asistente" aria-live="polite">
+            <p class="mensaje-asistente">Hola. Puedo resumir tus cobros y buscar clientes.</p>
+        </div>
+
+        <form id="formularioAsistente" class="formulario-asistente">
+            <input
+                type="text"
+                id="preguntaAsistente"
+                placeholder="Ejemplo: ¿Cuánto dinero falta por cobrar?"
+                autocomplete="off"
+            >
+            <button type="submit">Preguntar</button>
+            <button
+                type="button"
+                onclick="limpiarConversacionAsistente()"
+            >
+                Limpiar consultas
+            </button>
+        </form>
+
     </div>
 
     <!-- Buscar Cliente -->
@@ -140,7 +188,7 @@ style="margin-top: 10px;"
 
     </div>
 
-    <!-- Clientes -->
+        <!-- Clientes -->
 
     <div id="clientes">
     </div>

@@ -238,6 +238,225 @@ comprobarSesion();
 let clientes =
     JSON.parse(localStorage.getItem("clientes")) || [];
 
+// ========================================
+// ASISTENTE DE COBROS
+// ========================================
+
+function convertirFechaAbono(fechaTexto) {
+
+    if (typeof fechaTexto !== "string") {
+        return null;
+    }
+
+    const partes = fechaTexto.split("/");
+
+    if (partes.length !== 3) {
+        return null;
+    }
+
+    const dia = Number(partes[0]);
+    const mes = Number(partes[1]) - 1;
+    const anio = Number(partes[2]);
+    const fecha = new Date(anio, mes, dia);
+
+    if (
+        Number.isNaN(fecha.getTime()) ||
+        fecha.getDate() !== dia ||
+        fecha.getMonth() !== mes ||
+        fecha.getFullYear() !== anio
+    ) {
+        return null;
+    }
+
+    return fecha;
+}
+
+function obtenerFechaRegistro(cliente) {
+
+    if (typeof cliente.fechaRegistro === "string" && cliente.fechaRegistro) {
+        return cliente.fechaRegistro;
+    }
+
+    if (typeof cliente.id === "number") {
+        const fechaRegistro = new Date(cliente.id);
+
+        if (!Number.isNaN(fechaRegistro.getTime())) {
+            return fechaRegistro.toLocaleDateString("es-CR");
+        }
+    }
+
+    return "fecha no disponible";
+}
+
+function clienteTieneAbonoReciente(cliente, fechaInicio) {
+
+    const abonos = cliente.abonos || [];
+
+    return abonos.some(abono => {
+        const fechaAbono = convertirFechaAbono(abono.fecha);
+
+        return fechaAbono && fechaAbono >= fechaInicio;
+    });
+}
+
+function responderAsistente(pregunta) {
+
+    const texto = pregunta.toLowerCase();
+
+    const clientesPendientes = clientes.filter(cliente => {
+        return cliente.total - cliente.abonado > 0;
+    });
+
+    const saldoTotal = clientesPendientes.reduce((total, cliente) => {
+        return total + cliente.total - cliente.abonado;
+    }, 0);
+
+    const consultaSinAbonosRecientes =
+        texto.includes("sin abonos") ||
+        texto.includes("no ha realizado abonos") ||
+        texto.includes("no han realizado abonos") ||
+        texto.includes("no ha abonado") ||
+        texto.includes("no han abonado") ||
+        texto.includes("últimos meses") ||
+        texto.includes("ultimos meses");
+
+    if (consultaSinAbonosRecientes) {
+        const fechaActual = new Date();
+        const fechaInicio = new Date(
+            fechaActual.getFullYear(),
+            fechaActual.getMonth() - 11,
+            1
+        );
+
+        const clientesSinAbonos = clientes.filter(cliente => {
+            return !clienteTieneAbonoReciente(cliente, fechaInicio);
+        });
+
+        if (clientesSinAbonos.length === 0) {
+            return "Todos los clientes tienen al menos un abono en los últimos 12 meses, incluido el mes actual.";
+        }
+
+        const resumen = clientesSinAbonos.map(cliente => {
+            const saldo = cliente.total - cliente.abonado;
+            return `${cliente.nombre} (${formatoMoneda(saldo)} pendiente)`;
+        });
+
+        return "Clientes sin abonos en los últimos 12 meses, incluido el mes actual: " + resumen.join(", ") + ".";
+    }
+
+    if (texto.includes("cuánto") || texto.includes("cuanto") || texto.includes("total")) {
+        return `Tienes ${clientesPendientes.length} cliente(s) pendiente(s) y faltan ${formatoMoneda(saldoTotal)} por cobrar.`;
+    }
+
+    if (texto.includes("quién") || texto.includes("quien") || texto.includes("pendiente")) {
+        if (clientesPendientes.length === 0) {
+            return "No tienes clientes con saldo pendiente.";
+        }
+
+        const resumen = clientesPendientes.map(cliente => {
+            const saldo = cliente.total - cliente.abonado;
+            return `${cliente.nombre}: ${formatoMoneda(saldo)}`;
+        });
+
+        return "Clientes pendientes: " + resumen.join(", ") + ".";
+    }
+
+    const clienteEncontrado = clientes.find(cliente => {
+        return texto.includes(cliente.nombre.toLowerCase());
+    });
+
+    if (clienteEncontrado) {
+        const consultaUltimoAbono =
+            texto.includes("último abono") ||
+            texto.includes("ultimo abono") ||
+            texto.includes("última fecha") ||
+            texto.includes("ultima fecha") ||
+            texto.includes("último pago") ||
+            texto.includes("ultimo pago");
+
+        if (consultaUltimoAbono) {
+            const abonos = clienteEncontrado.abonos || [];
+
+            if (abonos.length === 0) {
+                const saldo = clienteEncontrado.total - clienteEncontrado.abonado;
+                return `${clienteEncontrado.nombre} tiene un saldo pendiente de ${formatoMoneda(saldo)}, todavía no tiene abonos registrados y el monto a cobrar fue registrado el ${obtenerFechaRegistro(clienteEncontrado)}.`;
+            }
+
+            const ultimoAbono = abonos[abonos.length - 1];
+            return `El último abono de ${clienteEncontrado.nombre} fue el ${ultimoAbono.fecha}, por ${formatoMoneda(ultimoAbono.monto)}.`;
+        }
+
+        const saldo = clienteEncontrado.total - clienteEncontrado.abonado;
+        const abonos = clienteEncontrado.abonos || [];
+
+        if (abonos.length === 0) {
+            return `${clienteEncontrado.nombre} tiene un saldo pendiente de ${formatoMoneda(saldo)}, todavía no registra abonos y el monto a cobrar fue registrado el ${obtenerFechaRegistro(clienteEncontrado)}.`;
+        }
+
+        const ultimoAbono = abonos[abonos.length - 1];
+        return `${clienteEncontrado.nombre} tiene un saldo pendiente de ${formatoMoneda(saldo)}. Su último abono fue el ${ultimoAbono.fecha}, por ${formatoMoneda(ultimoAbono.monto)}.`;
+    }
+
+    return "Puedo ayudarte con el total pendiente, los clientes con deuda o el saldo de un cliente específico.";
+}
+
+function agregarMensajeAsistente(texto, clase) {
+
+    const mensajes = document.getElementById("mensajesAsistente");
+    const mensaje = document.createElement("p");
+
+    mensaje.className = clase;
+    mensaje.textContent = texto;
+    mensajes.appendChild(mensaje);
+    mensajes.scrollTop = mensajes.scrollHeight;
+}
+
+function limpiarConversacionAsistente() {
+
+    const mensajes = document.getElementById("mensajesAsistente");
+
+    mensajes.innerHTML = "";
+    agregarMensajeAsistente(
+        "Conversación limpiada. ¿En qué puedo ayudarte?",
+        "mensaje-asistente"
+    );
+}
+
+function alternarAsistente(abrir) {
+
+    const panel = document.getElementById("panelAsistente");
+    const boton = document.getElementById("botonAbrirAsistente");
+    const debeAbrir = typeof abrir === "boolean"
+        ? abrir
+        : panel.classList.contains("asistente-oculto");
+
+    panel.classList.toggle("asistente-oculto", !debeAbrir);
+    boton.setAttribute("aria-expanded", String(debeAbrir));
+}
+
+function configurarAsistente() {
+
+    const formulario = document.getElementById("formularioAsistente");
+
+    formulario.addEventListener("submit", function (evento) {
+
+        evento.preventDefault();
+
+        const entrada = document.getElementById("preguntaAsistente");
+        const pregunta = entrada.value.trim();
+
+        if (!pregunta) {
+            return;
+        }
+
+        agregarMensajeAsistente(pregunta, "mensaje-usuario");
+        agregarMensajeAsistente(responderAsistente(pregunta), "mensaje-asistente");
+        entrada.value = "";
+    });
+}
+
+configurarAsistente();
+
 
 // ========================================
 // GUARDAR CLIENTE
@@ -267,6 +486,8 @@ function guardarCliente() {
         id: Date.now(),
 
         nombre: nombre.trim(),
+
+        fechaRegistro: new Date().toLocaleDateString("es-CR"),
 
         total: monto,
 
@@ -892,6 +1113,9 @@ function agregarNuevoMonto(id) {
 
     cliente.total =
         nuevoMonto;
+
+    cliente.fechaRegistro =
+        new Date().toLocaleDateString("es-CR");
 
     cliente.abonado =
         0;

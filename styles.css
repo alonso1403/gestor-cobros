@@ -36,6 +36,85 @@ button {
     margin-bottom: 10px;
 }
 
+.mensajes-asistente {
+    max-height: 220px;
+    overflow-y: auto;
+    margin-bottom: 12px;
+}
+
+.asistente-card {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 10;
+    box-sizing: border-box;
+    width: min(360px, calc(100vw - 40px));
+    margin-bottom: 0;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+
+.asistente-oculto {
+    display: none;
+}
+
+.boton-flotante-asistente {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 9;
+    width: auto;
+    padding: 12px 18px;
+}
+
+.encabezado-asistente {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.encabezado-asistente h2 {
+    margin-top: 0;
+}
+
+.boton-cerrar-asistente {
+    width: auto;
+    padding: 4px 10px;
+    font-size: 22px;
+    line-height: 1;
+}
+
+.mensaje-asistente,
+.mensaje-usuario {
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin: 8px 0;
+}
+
+.mensaje-asistente {
+    background: #e8f1ff;
+}
+
+.mensaje-usuario {
+    background: #eef2f7;
+    text-align: right;
+}
+
+.formulario-asistente {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.formulario-asistente input {
+    margin-bottom: 0;
+}
+
+.formulario-asistente button {
+    width: 100%;
+    white-space: nowrap;
+}
+
 /* ========================================
    EVITAR ZOOM AUTOMÁTICO EN IPHONE
 ======================================== */
@@ -53,4 +132,29 @@ textarea {
     padding: 6px 10px;
     font-size: 12px;
     width: auto;
+}
+
+@media (max-width: 480px) {
+
+    .asistente-card {
+        right: 12px;
+        bottom: calc(12px + env(safe-area-inset-bottom));
+        width: calc(100vw - 24px);
+        max-height: calc(100vh - 24px - env(safe-area-inset-bottom));
+        overflow-y: auto;
+    }
+
+    .boton-flotante-asistente {
+        right: 12px;
+        bottom: calc(12px + env(safe-area-inset-bottom));
+    }
+
+    .encabezado-asistente h2 {
+        font-size: 20px;
+        margin-bottom: 12px;
+    }
+
+    .mensajes-asistente {
+        max-height: 180px;
+    }
 }
