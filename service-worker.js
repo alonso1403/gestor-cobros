@@ -1,4 +1,4 @@
-const CACHE_NAME = "gestor-cobros-v2";
+const CACHE_NAME = "gestor-cobros-v3";
 
 const ARCHIVOS = [
     "./",
@@ -35,9 +35,17 @@ self.addEventListener("activate", event => {
 
 self.addEventListener("fetch", event => {
     event.respondWith(
-        caches.match(event.request)
+        fetch(event.request)
             .then(respuesta => {
-                return respuesta || fetch(event.request);
+                if (event.request.method === "GET" && respuesta.ok) {
+                    const copia = respuesta.clone();
+                    caches.open(CACHE_NAME).then(cache => {
+                        cache.put(event.request, copia);
+                    });
+                }
+
+                return respuesta;
             })
+            .catch(() => caches.match(event.request))
     );
 });
