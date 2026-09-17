@@ -1,14 +1,16 @@
-const CACHE_NAME = "gestor-cobros-v1";
+const CACHE_NAME = "gestor-cobros-v2";
 
 const ARCHIVOS = [
     "./",
     "./index.html",
-    "./style.css",
+    "./styles.css",
     "./app.js",
     "./manifest.json"
 ];
 
 self.addEventListener("install", event => {
+    self.skipWaiting();
+
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => {
@@ -18,6 +20,8 @@ self.addEventListener("install", event => {
 });
 
 self.addEventListener("activate", event => {
+    event.waitUntil(self.clients.claim());
+
     event.waitUntil(
         caches.keys().then(nombres => {
             return Promise.all(

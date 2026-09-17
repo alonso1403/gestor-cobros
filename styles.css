@@ -137,9 +137,10 @@ textarea {
 @media (max-width: 480px) {
 
     .asistente-card {
+        left: 12px;
         right: 12px;
         bottom: calc(12px + env(safe-area-inset-bottom));
-        width: calc(100vw - 24px);
+        width: auto;
         max-height: calc(100vh - 24px - env(safe-area-inset-bottom));
         overflow-y: auto;
     }
